@@ -1,0 +1,33 @@
+name: "Build package"
+description: "Build Debian package"
+author: Raphael Grewe
+
+inputs:
+  arch:
+    description: What architecture
+    required: true
+  registry:
+    description: What registry
+    required: true
+  debian_release_name:
+    description: What debian release
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - id: build_docker
+      run: |
+        docker run \
+          --pull always \
+          --rm \
+          -v /var/run/docker.sock:/var/run/docker.sock \
+          -v ${{ env.CI_PROJECT_DIR }}:${{ env.CI_PROJECT_DIR }} \
+          --workdir ${{ env.CI_PROJECT_DIR}} \
+          -e HOSTUSER="$(id -u)" \
+          -e HOSTGROUP="$(id -g)" \
+          -e DB_BUILD_PARAM="-sa" \
+          -e WORKING_DIR="${{ env.WORKING_DIR }}" \
+          -e CI_PROJECT_DIR="${{ env.CI_PROJECT_DIR }}" \
+          ${{ inputs.registry }}/${{ inputs.arch }}/gbp:${{ inputs.debian_release_name }}
+      shell: bash

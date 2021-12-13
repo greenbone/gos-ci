@@ -1,0 +1,260 @@
+name: GOS-CI Pipeline
+
+on:
+  workflow_call:
+    inputs:
+      GOS_CI_DISABLE_BLHC:
+        type: number
+        default: 0
+        required: false
+    secrets:
+      GOS_CI_REGISTRY:
+        required: true
+      GOS_REPOSITORY_HOST:
+        required: true
+      GOS_REPOSITORY_KEY:
+        required: true
+
+env:
+  DEBFULLNAME: "GOS Pipeline"
+  DEBEMAIL: ${{ secrets.GOS_DEBEMAIL }}
+  DEBIAN_FRONTEND: noninteractive
+  WORKING_DIR: ${{ github.workspace }}/debian/output
+  VENDOR: "debian"
+  ARCH: "amd64"
+  GOS_CI_MIRROR: "http://deb.debian.org/debian"
+  GOS_CI_COMPONENTS: "main"
+  GOS_CI_IMAGES_REPOSITORY: ${GOS_CI_REGISTRY}/${ARCH}/repository
+  GOS_CI_IMAGES_AUTOPKGTEST: ${GOS_CI_REGISTRY}/${ARCH}/autopkgtest
+  GOS_CI_IMAGES_BLHC: ${GOS_CI_REGISTRY}/${ARCH}/blhc:stable
+  GOS_CI_IMAGES_GBP: ${GOS_CI_REGISTRY}/${ARCH}/gbp:stable
+  GOS_CI_IMAGES_PIUPARTS: ${GOS_CI_REGISTRY}/${ARCH}/piuparts:stable
+  GOS_CI_PIUPARTS_ARGS: ""
+  GOS_CI_BLHC_ARGS: ""
+  DOCKER_TLS_CERTDIR: ""
+  GOS_CI_DISABLE_PUBLISH: 0
+  GOS_CI_DISABLE_MISSING_BREAKS: 1
+  GOS_CI_DISABLE_RC_BUGS: 1
+  GOS_CI_DISABLE_REPROTEST: 1
+  GOS_CI_DISABLE_BLHC: ${{ inputs.GOS_CI_DISABLE_BLHC }}
+  GOS_REPOSITORY_HOSTNAME: ${{ secrets.GOS_REPOSITORY_HOST }}
+  DB_BUILD_PARAM: '-sa'
+  CI_PROJECT_DIR: ${{ github.workspace }}
+  CI_ACTIONS_REPOSITORY: greenbone/gos-ci
+  CI_ACTIONS_PATH: ./.github/actions/
+
+
+jobs:
+  gather:
+    runs-on: gos-ci-amd64
+    outputs:
+      release: ${{ steps.release.outputs.release }}
+      debian_release_name: ${{ steps.release.outputs.debian_release_name }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Gather information
+        id: release
+        run: |
+          RELEASE=$(head -n 1 debian/changelog | cut -d ' ' -f3 | cut -d ';' -f1)
+          echo "::set-output name=release::$RELEASE"
+
+          if [ "$RELEASE" = "gos4.3" ] || [ "$RELEASE" = "gos5.0" ] || [ "$RELEASE" = "gos6.0" ]; then
+              DEBIAN_RELEASE_NAME="stretch"
+          elif [ "$RELEASE" = "gos20.08" ] || [ "$RELEASE" = "gos21.04" ] || [ "$RELEASE" = "gos21.10" ]; then
+              DEBIAN_RELEASE_NAME="buster"
+          elif [ "$RELEASE" = "abomination" ]; then
+              DEBIAN_RELEASE_NAME="bullseye"
+          fi
+          echo "::set-output name=debian_release_name::$DEBIAN_RELEASE_NAME"
+
+  build:
+    name: Build Debian Packages
+    needs: [gather]
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            subversion: ""
+            runner: gos-ci-amd64
+          - arch: arm64
+            subversion: "v8"
+            runner: gos-ci-arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+# Checkout is required, otherwise we have no data in workspace.
+      - uses: actions/checkout@v2
+      - name: Build package
+        uses: greenbone/gos-ci/.github/actions/build@main
+        with:
+          arch: ${{ matrix.arch }}${{ matrix.subversion }}
+          registry: ${{ secrets.GOS_CI_REGISTRY }}
+          debian_release_name: ${{ needs.gather.outputs.debian_release_name }}
+      - name: Upload changes
+        uses: actions/upload-artifact@v1
+        with:
+          name: "build_output_${{ matrix.arch }}"
+          path: ./debian/output
+      - run: rm -r ./debian/output
+
+  upload:
+    name: Upload packages to feed server
+    needs: build
+    runs-on: gos-ci-amd64
+    steps:
+      - name: Download artifacts from build
+        uses: actions/download-artifact@v2
+        with:
+          path: ${{ env.WORKING_DIR }}
+      - run: |
+          mv ${{ env.WORKING_DIR }}/build_output_amd64/* ${{ env.WORKING_DIR }}
+          mv ${{ env.WORKING_DIR }}/build_output_arm64/* ${{ env.WORKING_DIR }}
+      - name: Trigger upload
+        uses: greenbone/gos-ci/.github/actions/upload@main
+        with:
+          arch: amd64
+          registry: ${{ secrets.GOS_CI_REGISTRY }}
+          key: ${{ secrets.GOS_REPOSITORY_KEY }}
+          host: ${{ secrets.GOS_REPOSITORY_HOST }}
+      - run: rm -r ${{ env.WORKING_DIR }}/*
+
+  test-lintian:
+    name: Test with lintian
+    needs: [upload, gather]
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            subversion: ""
+          - arch: arm64
+            subversion: "v8"
+    runs-on: gos-ci-${{ matrix.arch }}
+    steps:
+      - name: Download artifacts from build
+        uses: actions/download-artifact@v1
+        with:
+          name: "build_output_${{ matrix.arch }}"
+          path: ${{ env.WORKING_DIR }}
+      - name: Trigger lintian
+        uses: greenbone/gos-ci/.github/actions/lintian@main
+        with:
+          arch: ${{ matrix.arch }}${{ matrix.subversion }}
+          registry: ${{ secrets.GOS_CI_REGISTRY }}
+          release: ${{ needs.gather.outputs.release }}
+
+  test-autopkgtest:
+    name: Test with autopkgtest
+    needs: [upload, gather]
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            subversion: ""
+          - arch: arm64
+            subversion: "v8"
+    runs-on: gos-ci-${{ matrix.arch }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download artifacts from build
+        uses: actions/download-artifact@v1
+        with:
+          name: "build_output_${{ matrix.arch }}"
+          path: ${{ env.WORKING_DIR }}
+      - name: Trigger autopkgtest
+        uses: greenbone/gos-ci/.github/actions/autopkgtest@main
+        with:
+          arch: ${{ matrix.arch }}${{ matrix.subversion }}
+          registry: ${{ secrets.GOS_CI_REGISTRY }}
+          debian_release_name: ${{ needs.gather.outputs.debian_release_name }}
+
+  test-piuparts:
+    name: Test with piuparts
+    needs: [upload, gather]
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            subversion: ""
+          - arch: arm64
+            subversion: "v8"
+    runs-on: gos-ci-${{ matrix.arch }}
+    steps:
+      - name: Download artifacts from build
+        uses: actions/download-artifact@v1
+        with:
+          name: "build_output_${{ matrix.arch }}"
+          path: ${{ env.WORKING_DIR }}
+      - name: Trigger piuparts
+        uses: greenbone/gos-ci/.github/actions/piuparts@main
+        with:
+          arch: ${{ matrix.arch }}${{ matrix.subversion }}
+          registry: ${{ secrets.GOS_CI_REGISTRY }}
+          debian_release_name: ${{ needs.gather.outputs.debian_release_name }}
+
+  test-blhc:
+    name: Test with blhc
+    needs: [upload, gather]
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            subversion: ""
+          - arch: arm64
+            subversion: "v8"
+    runs-on: gos-ci-${{ matrix.arch }}
+    if: inputs.GOS_CI_DISABLE_BLHC == 0
+    steps:
+      - name: Download artifacts from build
+        uses: actions/download-artifact@v1
+        with:
+          name: "build_output_${{ matrix.arch }}"
+          path: ${{ env.WORKING_DIR }}
+      - name: Trigger blhc
+        uses: greenbone/gos-ci/.github/actions/blhc@main
+        with:
+          arch: ${{ matrix.arch }}${{ matrix.subversion }}
+          registry: ${{ secrets.GOS_CI_REGISTRY }}
+          debian_release_name: ${{ needs.gather.outputs.debian_release_name }}
+
+  publish:
+    name: Publish new package
+    needs: [test-lintian, test-autopkgtest, test-piuparts, test-blhc]
+    runs-on: gos-ci-amd64
+# TODO: Find a better solution than this here! -.-
+    if: contains(fromJson('["gos20.08", "gos21.04", "gos21.10", "abomination"]'), github.ref_name)
+    steps:
+      - name: Trigger publish
+        uses: greenbone/gos-ci/.github/actions/publish@main
+        with:
+          arch: amd64
+          registry: ${{ secrets.GOS_CI_REGISTRY }}
+          key: ${{ secrets.GOS_REPOSITORY_KEY }}
+          host: ${{ secrets.GOS_REPOSITORY_HOST }}
+
+  cleanup-repo:
+    runs-on: gos-ci-amd64
+    needs: [test-lintian, test-autopkgtest, test-piuparts, test-blhc, publish]
+    if: ${{ always() }}
+    steps:
+      - name: Cleanup repository
+        uses: greenbone/gos-ci/.github/actions/clean@main
+        with:
+          arch: amd64
+          registry: ${{ secrets.GOS_CI_REGISTRY }}
+          key: ${{ secrets.GOS_REPOSITORY_KEY }}
+          host: ${{ secrets.GOS_REPOSITORY_HOST }}
+
+  cleanup-runner:
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            subversion: ""
+          - arch: arm64
+            subversion: "v8"
+    runs-on: gos-ci-${{ matrix.arch }}
+    needs: [cleanup-repo]
+    if: ${{ always() }}
+    steps:
+      - name: Cleanup workspace ${{ github.workspace }}
+        uses: greenbone/gos-ci/.github/actions/clean_workspace@main
+

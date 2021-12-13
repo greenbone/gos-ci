@@ -1,0 +1,21 @@
+name: "Piuparts test"
+description: "Piuparts test for Debian packages"
+author: Raphael Grewe
+
+inputs:
+  arch:
+    description: What architecture
+    required: true
+  registry:
+    description: What registry
+    required: true
+  debian_release_name:
+    description: What debian release
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        docker run --pull always --privileged --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${{ env.CI_PROJECT_DIR }}:/__w --workdir /__w -e WORKING_DIR="/__w/debian/output" ${{ inputs.registry }}/${{ inputs.arch }}/piuparts:${{ inputs.debian_release_name }} /run.sh
+      shell: bash

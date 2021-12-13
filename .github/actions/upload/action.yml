@@ -1,0 +1,24 @@
+name: "Upload packages"
+description: "Upload packages for GOS"
+author: Raphael Grewe
+
+inputs:
+  arch:
+    description: What architecture
+    required: true
+  registry:
+    description: What registry
+    required: true
+  key:
+    description: Get key
+    required: true
+  host:
+    description: What host
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        docker run --pull always --rm -v ${{ env.CI_PROJECT_DIR }}:${{ env.CI_PROJECT_DIR }} -e GOS_REPOSITORY_HOST="${{ inputs.host }}" -e GOS_REPOSITORY_KEY="${{ inputs.key }}" -e WORKING_DIR="${{ env.WORKING_DIR }}" --workdir ${{ env.CI_PROJECT_DIR }} ${{ inputs.registry }}/${{ inputs.arch }}/repository:latest /action.sh --upload
+      shell: bash

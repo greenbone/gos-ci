@@ -1,0 +1,24 @@
+name: "Publish packages"
+description: "Publish packages for GOS"
+author: Raphael Grewe
+
+inputs:
+  arch:
+    description: What architecture
+    required: true
+  registry:
+    description: What registry
+    required: true
+  key:
+    description: Get key
+    required: true
+  host:
+    description: What host
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        docker run --rm -v ${{ env.CI_PROJECT_DIR }}:/__w -e GOS_REPOSITORY_HOST="${{ inputs.host }}" -e GOS_REPOSITORY_KEY="${{ inputs.key }}" -e WORKING_DIR="/__w" --workdir /__w ${{ inputs.registry }}/${{ inputs.arch }}/repository:latest /action.sh --publish
+      shell: bash

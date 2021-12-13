@@ -1,0 +1,20 @@
+name: "BLHC test"
+description: "BLHC test for Debian packages"
+author: Raphael Grewe
+
+inputs:
+  arch:
+    description: What architecture
+    required: true
+  registry:
+    description: What registry
+    required: true
+  debian_release_name:
+    description: What debian release
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        docker run --pull always --rm -v ${{ env.CI_PROJECT_DIR }}:/__w --workdir /__W -e WORKING_DIR="/__w/debian/output" ${{ inputs.registry }}/${{ inputs.arch }}/blhc:${{ inputs.debian_release_name }}
+      shell: bash

@@ -1,0 +1,8 @@
+name: Cleanup our wWorkspace
+description: The cleanup action is required, otherwise old files keep living at the runner workspace
+runs:
+  using: "composite"
+  steps:
+    - shell: bash 
+      run: |
+        rm -rfv ${{ github.workspace }}

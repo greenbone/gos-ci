@@ -1,0 +1,21 @@
+name: "Lintian test"
+description: "Lintian test for Debian packages"
+author: Raphael Grewe
+
+inputs:
+  arch:
+    description: What architecture
+    required: true
+  registry:
+    description: What registry
+    required: true
+  release:
+    description: What release
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        docker run --pull always --rm -v ${{ env.WORKING_DIR }}:/debian --workdir /debian ${{ inputs.registry }}/${{ inputs.arch }}/lintian:${{ inputs.release }}
+      shell: bash
