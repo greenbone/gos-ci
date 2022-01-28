@@ -16,5 +16,5 @@ runs:
   using: "composite"
   steps:
     - run: |
-        docker run --pull always --rm -v ${{ env.CI_PROJECT_DIR }}:/__w --workdir /__W -e WORKING_DIR="/__w/debian/output" ${{ inputs.registry }}/${{ inputs.arch }}/blhc:${{ inputs.debian_release_name }}
+        docker run --pull always --rm -v ${{ env.CI_PROJECT_DIR }}:/__w --workdir /__w -e WORKING_DIR="/__w/debian/output" ${{ inputs.registry }}/${{ inputs.arch }}/blhc:${{ inputs.debian_release_name }}
       shell: bash

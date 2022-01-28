@@ -43,6 +43,7 @@ env:
   CI_ACTIONS_REPOSITORY: greenbone/gos-ci
   CI_ACTIONS_PATH: ./.github/actions/
 
+concurrency: pending_workflow_${{ github.repository }}
 
 jobs:
   gather:
