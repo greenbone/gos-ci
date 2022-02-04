@@ -133,6 +133,7 @@ jobs:
             runner: gos-ci-arm64
     runs-on: ${{ matrix.runner }}
     steps:
+      - uses: actions/checkout@v2
       - name: Download artifacts from build
         uses: actions/download-artifact@v1
         with:
