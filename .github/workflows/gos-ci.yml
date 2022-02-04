@@ -47,7 +47,7 @@ concurrency: pending_workflow_${{ github.repository }}
 
 jobs:
   gather:
-    runs-on: gos-ci-amd64
+    runs-on: self-hosted-generic
     outputs:
       release: ${{ steps.release.outputs.release }}
       debian_release_name: ${{ steps.release.outputs.debian_release_name }}
@@ -76,7 +76,7 @@ jobs:
         include:
           - arch: amd64
             subversion: ""
-            runner: gos-ci-amd64
+            runner: self-hosted-generic
           - arch: arm64
             subversion: "v8"
             runner: gos-ci-arm64
@@ -100,8 +100,9 @@ jobs:
   upload:
     name: Upload packages to feed server
     needs: build
-    runs-on: gos-ci-amd64
+    runs-on: self-hosted-generic
     steps:
+      - uses: actions/checkout@v2
       - name: Download artifacts from build
         uses: actions/download-artifact@v2
         with:
@@ -126,9 +127,11 @@ jobs:
         include:
           - arch: amd64
             subversion: ""
+            runner: self-hosted-generic
           - arch: arm64
             subversion: "v8"
-    runs-on: gos-ci-${{ matrix.arch }}
+            runner: gos-ci-arm64
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Download artifacts from build
         uses: actions/download-artifact@v1
@@ -150,9 +153,11 @@ jobs:
         include:
           - arch: amd64
             subversion: ""
+            runner: self-hosted-generic
           - arch: arm64
             subversion: "v8"
-    runs-on: gos-ci-${{ matrix.arch }}
+            runner: gos-ci-arm64
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v2
       - name: Download artifacts from build
@@ -175,10 +180,13 @@ jobs:
         include:
           - arch: amd64
             subversion: ""
+            runner: self-hosted-generic
           - arch: arm64
             subversion: "v8"
-    runs-on: gos-ci-${{ matrix.arch }}
+            runner: gos-ci-arm64
+    runs-on: ${{ matrix.runner }}
     steps:
+      - uses: actions/checkout@v2
       - name: Download artifacts from build
         uses: actions/download-artifact@v1
         with:
@@ -199,9 +207,11 @@ jobs:
         include:
           - arch: amd64
             subversion: ""
+            runner: self-hosted-generic
           - arch: arm64
             subversion: "v8"
-    runs-on: gos-ci-${{ matrix.arch }}
+            runner: gos-ci-arm64
+    runs-on: ${{ matrix.runner }}
     if: inputs.GOS_CI_DISABLE_BLHC == 0
     steps:
       - name: Download artifacts from build
@@ -219,10 +229,11 @@ jobs:
   publish:
     name: Publish new package
     needs: [test-lintian, test-autopkgtest, test-piuparts, test-blhc]
-    runs-on: gos-ci-amd64
+    runs-on: self-hosted-generic
 # TODO: Find a better solution than this here! -.-
     if: contains(fromJson('["gos20.08", "gos21.04", "gos21.10", "abomination"]'), github.ref_name)
     steps:
+      - uses: actions/checkout@v2
       - name: Trigger publish
         uses: greenbone/gos-ci/.github/actions/publish@main
         with:
@@ -232,10 +243,11 @@ jobs:
           host: ${{ secrets.GOS_REPOSITORY_HOST }}
 
   cleanup-repo:
-    runs-on: gos-ci-amd64
+    runs-on: self-hosted-generic
     needs: [test-lintian, test-autopkgtest, test-piuparts, test-blhc, publish]
     if: ${{ always() }}
     steps:
+      - uses: actions/checkout@v2
       - name: Cleanup repository
         uses: greenbone/gos-ci/.github/actions/clean@main
         with:
@@ -250,9 +262,11 @@ jobs:
         include:
           - arch: amd64
             subversion: ""
+            runner: self-hosted-generic
           - arch: arm64
             subversion: "v8"
-    runs-on: gos-ci-${{ matrix.arch }}
+            runner: gos-ci-arm64
+    runs-on: ${{ matrix.runner }}
     needs: [cleanup-repo]
     if: ${{ always() }}
     steps:
