@@ -7,6 +7,10 @@ on:
         type: number
         default: 0
         required: false
+      GOS_CI_DISABLE_PIUPARTS:
+        type: number
+        default: 0
+        required: false
     secrets:
       GOS_CI_REGISTRY:
         required: true
@@ -186,6 +190,7 @@ jobs:
             subversion: "v8"
             runner: gos-ci-arm64
     runs-on: ${{ matrix.runner }}
+    if: inputs.GOS_CI_DISABLE_PIUPARTS == 0
     steps:
       - uses: actions/checkout@v2
       - name: Download artifacts from build
