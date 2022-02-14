@@ -237,7 +237,13 @@ jobs:
     needs: [test-lintian, test-autopkgtest, test-piuparts, test-blhc]
     runs-on: self-hosted-generic
 # TODO: Find a better solution than this here! -.-
-    if: contains(fromJson('["gos20.08", "gos21.04", "gos21.10", "abomination"]'), github.ref_name)
+    if: |
+      always() &&
+      (needs.test-lintian.result == 'success' || needs.test-lintian.result == 'skipped') &&
+      (needs.test-autopkgtest.result == 'success' || needs.test-autopkgtest.result == 'skipped') &&
+      (needs.test-piuparts.result == 'success' || needs.test-piuparts.result == 'skipped') &&
+      (needs.test-blhc.result == 'success' || needs.test-blhc.result == 'skipped') &&
+      contains(fromJson('["gos20.08", "gos21.04", "gos21.10", "abomination"]'), github.ref_name)
     steps:
       - uses: actions/checkout@v2
       - name: Trigger publish
