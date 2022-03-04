@@ -163,6 +163,8 @@ jobs:
             subversion: "v8"
             runner: gos-ci-arm64
     runs-on: ${{ matrix.runner }}
+# Research why this is not working. -.-
+#    if: hashFiles('debian/tests/control')
     steps:
       - uses: actions/checkout@v2
       - name: Download artifacts from build
