@@ -99,7 +99,7 @@ jobs:
         with:
           name: "build_output_${{ matrix.arch }}"
           path: ./debian/output
-          retention-days: 7
+          retention-days: 2
       - run: rm -r ./debian/output
 
   upload:
