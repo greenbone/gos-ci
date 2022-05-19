@@ -17,5 +17,8 @@ runs:
   using: "composite"
   steps:
     - run: |
-        docker run --pull always --privileged --rm -v ${{ env.CI_PROJECT_DIR }}:/__w -e WORKING_DIR="/__w" --workdir /__w ${{ inputs.registry }}/${{ inputs.arch }}/autopkgtest:${{ inputs.debian_release_name }}
+        # Formerly we used autopkgtest:buster docker container to run our buster lxc container.
+        # Since latest upgrades on our host lxc-start is segfaulting within the buster container for unknown reason.
+        # As a workaround we use the bullseye docker container instead of the buster one for all tests.
+        docker run --pull always --privileged --rm -v ${{ env.CI_PROJECT_DIR }}:/__w -e WORKING_DIR="/__w" --workdir /__w ${{ inputs.registry }}/${{ inputs.arch }}/autopkgtest:bullseye
       shell: bash
