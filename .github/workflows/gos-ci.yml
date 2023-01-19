@@ -246,8 +246,8 @@ jobs:
       always() &&
       needs.test-lintian.result == 'success' &&
       needs.test-autopkgtest.result == 'success' &&
-      (needs.test-piuparts.result == 'success' || (GOS_CI_DISABLE_PIUPARTS != 0 && needs.test-piuparts.result == 'skipped')) &&
-      (needs.test-blhc.result == 'success' || (GOS_CI_DISABLE_BLHC != 0 && needs.test-blhc.result == 'skipped')) &&
+      (needs.test-piuparts.result == 'success' || (inputs.GOS_CI_DISABLE_PIUPARTS != 0 && needs.test-piuparts.result == 'skipped')) &&
+      (needs.test-blhc.result == 'success' || (inputs.GOS_CI_DISABLE_BLHC != 0 && needs.test-blhc.result == 'skipped')) &&
       contains(fromJson('["gos20.08", "gos21.04", "gos21.10", "abomination"]'), github.ref_name)
     steps:
       - uses: actions/checkout@v2
