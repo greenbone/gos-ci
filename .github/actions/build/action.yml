@@ -29,5 +29,6 @@ runs:
           -e DB_BUILD_PARAM="-sa" \
           -e WORKING_DIR="${{ env.WORKING_DIR }}" \
           -e CI_PROJECT_DIR="${{ env.CI_PROJECT_DIR }}" \
+          -e TOKEN="${{ env.TOKEN }}" \
           ${{ inputs.registry }}/${{ inputs.arch }}/gbp:${{ inputs.debian_release_name }}
       shell: bash
