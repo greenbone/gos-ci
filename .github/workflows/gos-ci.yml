@@ -18,6 +18,8 @@ on:
         required: true
       GOS_REPOSITORY_KEY:
         required: true
+      TOKEN:
+        required: false
 
 env:
   DEBFULLNAME: "GOS Pipeline"
@@ -46,6 +48,7 @@ env:
   CI_PROJECT_DIR: ${{ github.workspace }}
   CI_ACTIONS_REPOSITORY: greenbone/gos-ci
   CI_ACTIONS_PATH: ./.github/actions/
+  TOKEN: ${{ secrets.TOKEN }}
 
 concurrency: pending_workflow_${{ github.repository }}
 
