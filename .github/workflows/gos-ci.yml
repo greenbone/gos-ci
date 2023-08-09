@@ -191,7 +191,7 @@ jobs:
         include:
           - arch: amd64
             subversion: ""
-            runner: self-hosted-generic
+            runner: self-hosted-generic-u2004
           - arch: arm64
             subversion: "v8"
             runner: gos-ci-arm64
@@ -292,4 +292,3 @@ jobs:
     steps:
       - name: Cleanup workspace ${{ github.workspace }}
         uses: greenbone/gos-ci/.github/actions/clean_workspace@main
-
