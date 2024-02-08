@@ -59,21 +59,22 @@ jobs:
       release: ${{ steps.release.outputs.release }}
       debian_release_name: ${{ steps.release.outputs.debian_release_name }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Gather information
         id: release
         run: |
           RELEASE=$(head -n 1 debian/changelog | cut -d ' ' -f3 | cut -d ';' -f1)
-          echo "::set-output name=release::$RELEASE"
-
+          echo "release=$RELEASE" >> $GITHUB_OUTPUT
           if [ "$RELEASE" = "gos4.3" ] || [ "$RELEASE" = "gos5.0" ] || [ "$RELEASE" = "gos6.0" ]; then
               DEBIAN_RELEASE_NAME="stretch"
           elif [ "$RELEASE" = "gos20.08" ] || [ "$RELEASE" = "gos21.04" ] || [ "$RELEASE" = "gos21.10" ]; then
               DEBIAN_RELEASE_NAME="buster"
           elif [ "$RELEASE" = "abomination" ]; then
               DEBIAN_RELEASE_NAME="bullseye"
+          elif [ "$RELEASE" = "shredder" ]; then
+              DEBIAN_RELEASE_NAME="bookworm"
           fi
-          echo "::set-output name=debian_release_name::$DEBIAN_RELEASE_NAME"
+          echo "debian_release_name=$DEBIAN_RELEASE_NAME" >> $GITHUB_OUTPUT
 
   build:
     name: Build Debian Packages
@@ -90,7 +91,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     steps:
 # Checkout is required, otherwise we have no data in workspace.
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Build package
         uses: greenbone/gos-ci/.github/actions/build@main
         with:
@@ -98,7 +99,7 @@ jobs:
           registry: ${{ secrets.GOS_CI_REGISTRY }}
           debian_release_name: ${{ needs.gather.outputs.debian_release_name }}
       - name: Upload changes
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: "build_output_${{ matrix.arch }}"
           path: ./debian/output
@@ -110,9 +111,9 @@ jobs:
     needs: build
     runs-on: self-hosted-generic
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Download artifacts from build
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           path: ${{ env.WORKING_DIR }}
       - run: |
@@ -141,9 +142,9 @@ jobs:
             runner: gos-ci-arm64
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Download artifacts from build
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4
         with:
           name: "build_output_${{ matrix.arch }}"
           path: ${{ env.WORKING_DIR }}
@@ -170,9 +171,9 @@ jobs:
 # Research why this is not working. -.-
 #    if: hashFiles('debian/tests/control')
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Download artifacts from build
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4
         with:
           name: "build_output_${{ matrix.arch }}"
           path: ${{ env.WORKING_DIR }}
@@ -198,9 +199,9 @@ jobs:
     runs-on: ${{ matrix.runner }}
     if: inputs.GOS_CI_DISABLE_PIUPARTS == 0
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Download artifacts from build
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4
         with:
           name: "build_output_${{ matrix.arch }}"
           path: ${{ env.WORKING_DIR }}
@@ -227,7 +228,7 @@ jobs:
     if: inputs.GOS_CI_DISABLE_BLHC == 0
     steps:
       - name: Download artifacts from build
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4
         with:
           name: "build_output_${{ matrix.arch }}"
           path: ${{ env.WORKING_DIR }}
@@ -251,9 +252,9 @@ jobs:
       needs.test-autopkgtest.result == 'success' &&
       (needs.test-piuparts.result == 'success' || (inputs.GOS_CI_DISABLE_PIUPARTS != 0 && needs.test-piuparts.result == 'skipped')) &&
       (needs.test-blhc.result == 'success' || (inputs.GOS_CI_DISABLE_BLHC != 0 && needs.test-blhc.result == 'skipped')) &&
-      contains(fromJson('["gos20.08", "gos21.04", "gos21.10", "abomination"]'), github.ref_name)
+      contains(fromJson('["gos20.08", "gos21.04", "gos21.10", "abomination", "shredder"]'), github.ref_name)
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Trigger publish
         uses: greenbone/gos-ci/.github/actions/publish@main
         with:
@@ -267,7 +268,7 @@ jobs:
     needs: [test-lintian, test-autopkgtest, test-piuparts, test-blhc, publish]
     if: ${{ always() }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Cleanup repository
         uses: greenbone/gos-ci/.github/actions/clean@main
         with:

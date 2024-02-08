@@ -20,5 +20,5 @@ runs:
   using: "composite"
   steps:
     - run: |
-        docker run --rm -v ${{ env.CI_PROJECT_DIR }}:/__w -e GOS_REPOSITORY_HOST="${{ inputs.host }}" -e GOS_REPOSITORY_KEY="${{ inputs.key }}" -e WORKING_DIR="/__w" --workdir /__w ${{ inputs.registry }}/${{ inputs.arch }}/repository:latest /action.sh --clean
+        docker run --rm -v ${{ env.CI_PROJECT_DIR }}:/__w -e GOS_REPOSITORY_HOST="${{ inputs.host }}" -e GOS_REPOSITORY_KEY="${{ inputs.key }}" -e WORKING_DIR="/__w" --workdir /__w ${{ inputs.registry }}/${{ inputs.arch }}/repository:bookworm /action.sh --clean
       shell: bash

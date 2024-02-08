@@ -20,5 +20,5 @@ runs:
   using: "composite"
   steps:
     - run: |
-        docker run --pull always --rm -v ${{ env.CI_PROJECT_DIR }}:${{ env.CI_PROJECT_DIR }} -e GOS_REPOSITORY_HOST="${{ inputs.host }}" -e GOS_REPOSITORY_KEY="${{ inputs.key }}" -e WORKING_DIR="${{ env.WORKING_DIR }}" --workdir ${{ env.CI_PROJECT_DIR }} ${{ inputs.registry }}/${{ inputs.arch }}/repository:latest /action.sh --upload
+        docker run --pull always --rm -v ${{ env.CI_PROJECT_DIR }}:${{ env.CI_PROJECT_DIR }} -e GOS_REPOSITORY_HOST="${{ inputs.host }}" -e GOS_REPOSITORY_KEY="${{ inputs.key }}" -e WORKING_DIR="${{ env.WORKING_DIR }}" --workdir ${{ env.CI_PROJECT_DIR }} ${{ inputs.registry }}/${{ inputs.arch }}/repository:bookworm /action.sh --upload
       shell: bash
