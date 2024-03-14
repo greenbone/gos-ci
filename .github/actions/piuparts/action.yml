@@ -16,6 +16,22 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ env.GITHUB_TOKEN }}
     - run: |
-        docker run --pull always --privileged --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${{ env.CI_PROJECT_DIR }}:/__w --workdir /__w -e WORKING_DIR="/__w/debian/output" ${{ inputs.registry }}/${{ inputs.arch }}/piuparts:${{ inputs.debian_release_name }} /run.sh
+        docker run \
+          --pull always \
+          --privileged \
+          --rm \
+          -v /var/run/docker.sock:/var/run/docker.sock \
+          -v ${{ env.CI_PROJECT_DIR }}:/__w \
+          --workdir /__w \
+          -e WORKING_DIR="/__w/debian/output" \
+          -e GITHUB_TOKEN="${{ env.GITHUB_TOKEN }}" \
+          -e GITHUB_ACTOR="${{ github.actor }}" \
+          ${{ inputs.registry }}/${{ inputs.arch }}/piuparts:${{ inputs.debian_release_name }} /run.sh
       shell: bash

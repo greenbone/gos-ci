@@ -98,6 +98,8 @@ jobs:
           arch: ${{ matrix.arch }}${{ matrix.subversion }}
           registry: ${{ secrets.GOS_CI_REGISTRY }}
           debian_release_name: ${{ needs.gather.outputs.debian_release_name }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - name: Upload changes
         uses: actions/upload-artifact@v4
         with:
@@ -126,6 +128,8 @@ jobs:
           registry: ${{ secrets.GOS_CI_REGISTRY }}
           key: ${{ secrets.GOS_REPOSITORY_KEY }}
           host: ${{ secrets.GOS_REPOSITORY_HOST }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - run: rm -r ${{ env.WORKING_DIR }}/*
 
   test-lintian:
@@ -154,6 +158,8 @@ jobs:
           arch: ${{ matrix.arch }}${{ matrix.subversion }}
           registry: ${{ secrets.GOS_CI_REGISTRY }}
           release: ${{ needs.gather.outputs.release }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
   test-autopkgtest:
     name: Test with autopkgtest
@@ -183,6 +189,8 @@ jobs:
           arch: ${{ matrix.arch }}${{ matrix.subversion }}
           registry: ${{ secrets.GOS_CI_REGISTRY }}
           debian_release_name: ${{ needs.gather.outputs.debian_release_name }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
   test-piuparts:
     name: Test with piuparts
@@ -211,6 +219,8 @@ jobs:
           arch: ${{ matrix.arch }}${{ matrix.subversion }}
           registry: ${{ secrets.GOS_CI_REGISTRY }}
           debian_release_name: ${{ needs.gather.outputs.debian_release_name }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
   test-blhc:
     name: Test with blhc
@@ -238,6 +248,8 @@ jobs:
           arch: ${{ matrix.arch }}${{ matrix.subversion }}
           registry: ${{ secrets.GOS_CI_REGISTRY }}
           debian_release_name: ${{ needs.gather.outputs.debian_release_name }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
   publish:
     name: Publish new package
@@ -262,6 +274,8 @@ jobs:
           registry: ${{ secrets.GOS_CI_REGISTRY }}
           key: ${{ secrets.GOS_REPOSITORY_KEY }}
           host: ${{ secrets.GOS_REPOSITORY_HOST }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
   cleanup-repo:
     runs-on: self-hosted-generic
@@ -276,6 +290,8 @@ jobs:
           registry: ${{ secrets.GOS_CI_REGISTRY }}
           key: ${{ secrets.GOS_REPOSITORY_KEY }}
           host: ${{ secrets.GOS_REPOSITORY_HOST }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
   cleanup-runner:
     strategy:

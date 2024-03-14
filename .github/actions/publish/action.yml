@@ -19,6 +19,12 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ env.GITHUB_TOKEN }}
     - run: |
         docker run --rm -v ${{ env.CI_PROJECT_DIR }}:/__w -e GOS_REPOSITORY_HOST="${{ inputs.host }}" -e GOS_REPOSITORY_KEY="${{ inputs.key }}" -e WORKING_DIR="/__w" --workdir /__w ${{ inputs.registry }}/${{ inputs.arch }}/repository:bookworm /action.sh --publish
       shell: bash
