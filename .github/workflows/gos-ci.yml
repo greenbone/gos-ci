@@ -20,6 +20,10 @@ on:
         required: true
       TOKEN:
         required: false
+      SECUREBOOT_DB_KEY:
+        required: false
+      SECUREBOOT_DB_CRT:
+        required: false
 
 env:
   DEBFULLNAME: "GOS Pipeline"
@@ -49,6 +53,8 @@ env:
   CI_ACTIONS_REPOSITORY: greenbone/gos-ci
   CI_ACTIONS_PATH: ./.github/actions/
   TOKEN: ${{ secrets.TOKEN }}
+  SECUREBOOT_DB_KEY: ${{ secrets.SECUREBOOT_DB_KEY }}
+  SECUREBOOT_DB_CRT: ${{ secrets.SECUREBOOT_DB_CRT }}
 
 concurrency: pending_workflow_${{ github.repository }}
 

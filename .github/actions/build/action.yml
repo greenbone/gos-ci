@@ -38,5 +38,7 @@ runs:
           -e TOKEN="${{ env.TOKEN }}" \
           -e GITHUB_TOKEN="${{ env.GITHUB_TOKEN }}" \
           -e GITHUB_ACTOR="${{ github.actor }}" \
+          -e SECUREBOOT_DB_KEY="${{ env.SECUREBOOT_DB_KEY }}" \
+          -e SECUREBOOT_DB_CRT="${{ env.SECUREBOOT_DB_CRT }}" \
           ${{ inputs.registry }}/${{ inputs.arch }}/gbp:${{ inputs.debian_release_name }}
       shell: bash
