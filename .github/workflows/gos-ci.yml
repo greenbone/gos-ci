@@ -206,7 +206,7 @@ jobs:
         include:
           - arch: amd64
             subversion: ""
-            runner: self-hosted-generic-u2004
+            runner: self-hosted-generic
           - arch: arm64
             subversion: "v8"
             runner: gos-ci-arm64
