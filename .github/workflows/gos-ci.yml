@@ -93,7 +93,7 @@ jobs:
             runner: self-hosted-generic
           - arch: arm64
             subversion: "v8"
-            runner: gos-ci-arm64
+            runner: self-hosted-generic-arm64
     runs-on: ${{ matrix.runner }}
     steps:
 # Checkout is required, otherwise we have no data in workspace.
@@ -149,7 +149,7 @@ jobs:
             runner: self-hosted-generic
           - arch: arm64
             subversion: "v8"
-            runner: gos-ci-arm64
+            runner: self-hosted-generic-arm64
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
@@ -178,7 +178,7 @@ jobs:
             runner: self-hosted-generic
           - arch: arm64
             subversion: "v8"
-            runner: gos-ci-arm64
+            runner: self-hosted-generic-arm64
     runs-on: ${{ matrix.runner }}
 # Research why this is not working. -.-
 #    if: hashFiles('debian/tests/control')
@@ -209,7 +209,7 @@ jobs:
             runner: self-hosted-generic
           - arch: arm64
             subversion: "v8"
-            runner: gos-ci-arm64
+            runner: self-hosted-generic-arm64
     runs-on: ${{ matrix.runner }}
     if: inputs.GOS_CI_DISABLE_PIUPARTS == 0
     steps:
@@ -239,7 +239,7 @@ jobs:
             runner: self-hosted-generic
           - arch: arm64
             subversion: "v8"
-            runner: gos-ci-arm64
+            runner: self-hosted-generic-arm64
     runs-on: ${{ matrix.runner }}
     if: inputs.GOS_CI_DISABLE_BLHC == 0
     steps:
@@ -308,7 +308,7 @@ jobs:
             runner: self-hosted-generic
           - arch: arm64
             subversion: "v8"
-            runner: gos-ci-arm64
+            runner: self-hosted-generic-arm64
     runs-on: ${{ matrix.runner }}
     needs: [cleanup-repo]
     if: ${{ always() }}
