@@ -26,6 +26,7 @@ runs:
         docker run \
           --pull always \
           --privileged \
+          --ulimit nofile=1048576 \
           --rm \
           -v /var/run/docker.sock:/var/run/docker.sock \
           -v ${{ env.CI_PROJECT_DIR }}:/__w \
