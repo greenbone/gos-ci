@@ -79,6 +79,8 @@ jobs:
               DEBIAN_RELEASE_NAME="bullseye"
           elif [ "$RELEASE" = "shredder" ]; then
               DEBIAN_RELEASE_NAME="bookworm"
+          elif [ "$RELEASE" = "prometheus" ]; then
+              DEBIAN_RELEASE_NAME="trixie"
           fi
           echo "debian_release_name=$DEBIAN_RELEASE_NAME" >> $GITHUB_OUTPUT
 
@@ -270,7 +272,7 @@ jobs:
       needs.test-autopkgtest.result == 'success' &&
       (needs.test-piuparts.result == 'success' || (inputs.GOS_CI_DISABLE_PIUPARTS != 0 && needs.test-piuparts.result == 'skipped')) &&
       (needs.test-blhc.result == 'success' || (inputs.GOS_CI_DISABLE_BLHC != 0 && needs.test-blhc.result == 'skipped')) &&
-      contains(fromJson('["gos20.08", "gos21.04", "gos21.10", "abomination", "shredder"]'), github.ref_name)
+      contains(fromJson('["gos20.08", "gos21.04", "gos21.10", "abomination", "shredder", "prometheus"]'), github.ref_name)
     steps:
       - uses: actions/checkout@v4
       - name: Trigger publish
