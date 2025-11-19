@@ -105,7 +105,7 @@ jobs:
         with:
           arch: ${{ matrix.arch }}${{ matrix.subversion }}
           registry: ${{ secrets.GOS_CI_REGISTRY }}
-          debian_release_name: ${{ needs.gather.outputs.debian_release_name }}
+          debian_release_name: trixie
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Upload changes
@@ -226,7 +226,7 @@ jobs:
         with:
           arch: ${{ matrix.arch }}${{ matrix.subversion }}
           registry: ${{ secrets.GOS_CI_REGISTRY }}
-          debian_release_name: ${{ needs.gather.outputs.debian_release_name }}
+          debian_release_name: trixie
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
