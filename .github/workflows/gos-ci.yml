@@ -71,7 +71,7 @@ jobs:
       release: ${{ steps.release.outputs.release }}
       debian_release_name: ${{ steps.release.outputs.debian_release_name }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Gather information
         id: release
         run: |
@@ -105,7 +105,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     steps:
 # Checkout is required, otherwise we have no data in workspace.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build package
         uses: greenbone/gos-ci/.github/actions/build@main
         with:
@@ -115,7 +115,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Upload changes
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: "build_output_${{ matrix.arch }}"
           path: ./debian/output
@@ -127,9 +127,9 @@ jobs:
     needs: build
     runs-on: self-hosted-generic
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Download artifacts from build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: ${{ env.WORKING_DIR }}
       - run: |
@@ -160,9 +160,9 @@ jobs:
             runner: self-hosted-generic-arm64
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Download artifacts from build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: "build_output_${{ matrix.arch }}"
           path: ${{ env.WORKING_DIR }}
@@ -191,9 +191,9 @@ jobs:
 # Research why this is not working. -.-
 #    if: hashFiles('debian/tests/control')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Download artifacts from build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: "build_output_${{ matrix.arch }}"
           path: ${{ env.WORKING_DIR }}
@@ -221,9 +221,9 @@ jobs:
     runs-on: ${{ matrix.runner }}
     if: inputs.GOS_CI_DISABLE_PIUPARTS == 0
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Download artifacts from build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: "build_output_${{ matrix.arch }}"
           path: ${{ env.WORKING_DIR }}
@@ -252,7 +252,7 @@ jobs:
     if: inputs.GOS_CI_DISABLE_BLHC == 0
     steps:
       - name: Download artifacts from build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: "build_output_${{ matrix.arch }}"
           path: ${{ env.WORKING_DIR }}
@@ -280,7 +280,7 @@ jobs:
       (needs.test-blhc.result == 'success' || (inputs.GOS_CI_DISABLE_BLHC != 0 && needs.test-blhc.result == 'skipped')) &&
       contains(fromJson('["gos20.08", "gos21.04", "gos21.10", "abomination", "shredder", "prometheus", "nebula"]'), github.ref_name)
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Trigger publish
         uses: greenbone/gos-ci/.github/actions/publish@main
         with:
@@ -296,7 +296,7 @@ jobs:
     needs: [test-lintian, test-autopkgtest, test-piuparts, test-blhc, publish]
     if: ${{ always() }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Cleanup repository
         uses: greenbone/gos-ci/.github/actions/clean@main
         with:
