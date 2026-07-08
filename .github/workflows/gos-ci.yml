@@ -59,6 +59,12 @@ env:
 concurrency: pending_workflow_${{ github.repository }}
 
 jobs:
+  detect-hidden-unicode:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: greenbone/actions/detect-hidden-unicode@v3
+        with:
+          github-token: ${{ secrets.GREENBONE_BOT_TOKEN }}
   gather:
     runs-on: self-hosted-generic
     outputs:
