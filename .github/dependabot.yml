@@ -11,3 +11,13 @@ updates:
     github-actions:
       patterns:
         - "*"
+- package-ecosystem: "github-actions"
+  directory: ".github/actions"
+  schedule:
+    interval: "monthly"
+  commit-message:
+    prefix: "chore(deps)"
+  groups:
+    github-actions:
+      patterns:
+        - "*"
